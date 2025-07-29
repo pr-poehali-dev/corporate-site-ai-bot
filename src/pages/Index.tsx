@@ -9,32 +9,40 @@ import Icon from '@/components/ui/icon'
 
 export default function AICorpSite() {
   const [chatOpen, setChatOpen] = useState(false)
-  const [messages, setMessages] = useState([
-    { type: 'bot', text: 'Привет! 👋 Я ИИ-ассистент. Как дела?' }
-  ])
+  const [messages, setMessages] = useState([])
   const [userInput, setUserInput] = useState('')
   const [userBehavior, setUserBehavior] = useState({
     pageViews: 0,
     timeOnPage: 0,
-    interactionScore: 0
+    interactionScore: 0,
+    scrollProgress: 0
   })
+  const [showWelcomeDialog, setShowWelcomeDialog] = useState(false)
+  const [aiWelcome, setAiWelcome] = useState(false)
   const [animatedText, setAnimatedText] = useState('')
   
-  const aiGreeting = "Добро пожаловать в будущее корпоративных ИИ-решений"
+  const mainTitle = "Революционные ИИ-решения для корпораций"
+  const aiGreeting = "Добро пожаловать! Я ваш ИИ-помощник 🤖"
   
   useEffect(() => {
-    // Анимация печатающегося текста
+    // Анимационное приветствие при загрузке
+    setTimeout(() => {
+      setShowWelcomeDialog(true)
+      setMessages([{ type: 'bot', text: 'Привет! 👋 Меня зовут ARIA - ваш персональный ИИ-ассистент. Добро пожаловать в будущее корпоративных технологий!', timestamp: Date.now() }])
+    }, 1500)
+    
+    // Печатающийся текст
     let currentIndex = 0
     const timer = setInterval(() => {
-      if (currentIndex < aiGreeting.length) {
-        setAnimatedText(aiGreeting.slice(0, currentIndex + 1))
+      if (currentIndex < mainTitle.length) {
+        setAnimatedText(mainTitle.slice(0, currentIndex + 1))
         currentIndex++
       } else {
         clearInterval(timer)
       }
-    }, 80)
+    }, 100)
     
-    // Аналитика поведения пользователя
+    // Аналитика поведения
     const startTime = Date.now()
     setUserBehavior(prev => ({ ...prev, pageViews: prev.pageViews + 1 }))
     
@@ -45,135 +53,278 @@ export default function AICorpSite() {
       }))
     }, 1000)
     
+    // Отслеживание скролла
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
+      const scrolled = window.scrollY
+      const progress = (scrolled / scrollHeight) * 100
+      setUserBehavior(prev => ({ ...prev, scrollProgress: progress }))
+    }
+    
+    window.addEventListener('scroll', handleScroll)
+    
     return () => {
       clearInterval(timer)
       clearInterval(trackTime)
+      window.removeEventListener('scroll', handleScroll)
     }
   }, [])
   
   const handleChatSend = () => {
     if (!userInput.trim()) return
     
-    setMessages(prev => [...prev, { type: 'user', text: userInput }])
-    setUserBehavior(prev => ({ ...prev, interactionScore: prev.interactionScore + 10 }))
+    const newUserMessage = { type: 'user', text: userInput, timestamp: Date.now() }
+    setMessages(prev => [...prev, newUserMessage])
+    setUserBehavior(prev => ({ ...prev, interactionScore: prev.interactionScore + 15 }))
     
-    // Симуляция ответа ИИ
+    // Симуляция "печатания" ответа ИИ
     setTimeout(() => {
       const responses = [
-        'Отличный вопрос! Наши ИИ-решения помогут оптимизировать ваши процессы.',
-        'Я проанализировал ваш запрос. Рекомендую посмотреть раздел "Технологии".',
-        'На основе вашего поведения на сайте, вас может заинтересовать наш Demo.',
-        'Персонализированный контент: вы провели уже ' + userBehavior.timeOnPage + ' секунд на сайте!'
+        'Отличный вопрос! 🚀 Наша ИИ-платформа может увеличить эффективность вашего бизнеса на 300%. Хотите узнать как?',
+        `Я проанализировал ваше поведение - вы провели ${Math.floor(userBehavior.timeOnPage)} секунд на сайте. Рекомендую посмотреть раздел "Технологии" 📊`,
+        'На основе вашей активности, вас может заинтересовать наше интерактивное демо. Попробуем? 🎯',
+        `Персонализированный ответ: вы прокрутили ${Math.round(userBehavior.scrollProgress)}% страницы. Вижу, что вас интересуют наши решения! 📈`,
+        'Я использую нейросети последнего поколения для анализа ваших потребностей. Давайте обсудим, как ИИ может помочь именно вашей компании! 🧠'
       ]
+      
       setMessages(prev => [...prev, { 
         type: 'bot', 
-        text: responses[Math.floor(Math.random() * responses.length)]
+        text: responses[Math.floor(Math.random() * responses.length)],
+        timestamp: Date.now()
       }])
-    }, 1000)
+    }, 1200)
     
     setUserInput('')
   }
 
+  const handleAIGreeting = () => {
+    setChatOpen(true)
+    setAiWelcome(true)
+    setShowWelcomeDialog(false)
+    setMessages(prev => [...prev, { 
+      type: 'bot', 
+      text: 'Отлично! Теперь я могу помочь вам с любыми вопросами о наших ИИ-решениях. Что вас интересует больше всего? 🤔',
+      timestamp: Date.now()
+    }])
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-blue-950/20 to-background text-foreground font-medium">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white relative overflow-hidden">
+      {/* Фоновые анимированные элементы */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/2 -right-4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
       {/* Навигация */}
-      <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-lg border-b border-primary/20 z-50">
+      {/* Приветственный диалог ИИ */}
+      {showWelcomeDialog && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in">
+          <Card className="max-w-md mx-4 bg-slate-900/90 border-blue-500/30 shadow-2xl">
+            <CardHeader className="text-center pb-4">
+              <div className="relative mx-auto mb-4">
+                <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-bounce">
+                  <Icon name="Bot" size={36} className="text-white" />
+                </div>
+                <div className="absolute inset-0 bg-blue-400/30 rounded-full blur-xl animate-pulse"></div>
+              </div>
+              <CardTitle className="text-xl text-blue-400">ARIA - ИИ Ассистент</CardTitle>
+              <p className="text-slate-300 text-sm mt-2">
+                Персональный помощник для навигации по сайту
+              </p>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <p className="text-slate-200">
+                Привет! Я помогу вам изучить наши ИИ-решения и отвечу на любые вопросы.
+              </p>
+              <div className="flex gap-3">
+                <Button onClick={handleAIGreeting} className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
+                  <Icon name="MessageCircle" className="mr-2" size={16} />
+                  Начать чат
+                </Button>
+                <Button variant="outline" onClick={() => setShowWelcomeDialog(false)} className="border-slate-600 text-slate-300 hover:bg-slate-800">
+                  Позже
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Навигация */}
+      <nav className="fixed top-0 w-full bg-slate-950/80 backdrop-blur-xl border-b border-blue-500/20 z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Icon name="Cpu" className="text-primary animate-pulse-glow" size={32} />
-            <span className="text-2xl font-bold">AI CORPORATE</span>
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <Icon name="Brain" className="text-blue-400 animate-pulse" size={36} />
+              <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-xl animate-ping"></div>
+            </div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              NEURAL CORP
+            </span>
           </div>
           <div className="hidden md:flex space-x-8">
-            <a href="#home" className="hover:text-primary transition-colors">Главная</a>
-            <a href="#tech" className="hover:text-primary transition-colors">Технологии</a>
-            <a href="#solutions" className="hover:text-primary transition-colors">Решения</a>
-            <a href="#team" className="hover:text-primary transition-colors">Команда</a>
-            <a href="#demo" className="hover:text-primary transition-colors">Демо</a>
-            <a href="#contacts" className="hover:text-primary transition-colors">Контакты</a>
+            {['Главная', 'ИИ-Решения', 'Технологии', 'Команда', 'Демо', 'Контакты'].map((item) => (
+              <a key={item} href={`#${item.toLowerCase().replace('ии-', '').replace('-', '')}`} 
+                 className="hover:text-blue-400 transition-all duration-300 hover:scale-105 relative group">
+                {item}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover:w-full transition-all duration-300"></span>
+              </a>
+            ))}
           </div>
         </div>
       </nav>
 
       {/* Главная секция */}
-      <section id="home" className="pt-20 min-h-screen flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
+      {/* Главная секция */}
+      <section className="pt-24 min-h-screen flex items-center justify-center relative">
         <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="animate-fade-in">
-            <Icon name="Brain" className="mx-auto mb-8 text-primary animate-float" size={80} />
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-              {animatedText}
-              <span className="animate-pulse">|</span>
+          <div className="animate-fade-in-up">
+            <div className="relative mb-8">
+              <Icon name="Cpu" className="mx-auto text-blue-400" size={100} />
+              <div className="absolute inset-0 bg-blue-400/20 blur-3xl animate-pulse"></div>
+            </div>
+            
+            <h1 className="text-4xl md:text-7xl font-bold mb-8 leading-tight">
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                {animatedText}
+              </span>
+              <span className="animate-pulse text-blue-400">|</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-muted-foreground max-w-3xl mx-auto">
-              Революционные ИИ-технологии для вашего бизнеса. 
-              Аналитика поведения и персонализация нового уровня.
+            
+            <p className="text-xl md:text-2xl mb-12 text-slate-300 max-w-4xl mx-auto leading-relaxed">
+              Встречайте будущее бизнеса с нашими ИИ-технологиями. 
+              Персонализация, аналитика и автоматизация нового уровня.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="hover:scale-105 transition-transform animate-pulse-glow">
+            
+            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+              <Button size="lg" className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl">
                 <Icon name="Rocket" className="mr-2" size={20} />
-                Начать сейчас
+                Запустить ИИ
               </Button>
-              <Button variant="outline" size="lg" className="hover:scale-105 transition-transform">
+              <Button variant="outline" size="lg" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 transform hover:scale-105 transition-all duration-300">
                 <Icon name="Play" className="mr-2" size={20} />
                 Смотреть демо
               </Button>
             </div>
+
+            {/* Показатели в реальном времени */}
+            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {[
+                { label: 'ИИ Обработка', value: '2.3ms', icon: 'Zap', color: 'blue' },
+                { label: 'Точность', value: '99.7%', icon: 'Target', color: 'green' },
+                { label: 'Активные пользователи', value: '50K+', icon: 'Users', color: 'purple' }
+              ].map((stat, i) => (
+                <Card key={i} className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm transform hover:scale-105 transition-all duration-300">
+                  <CardContent className="flex items-center justify-between p-6">
+                    <div>
+                      <p className="text-slate-400 text-sm">{stat.label}</p>
+                      <p className="text-2xl font-bold text-white">{stat.value}</p>
+                    </div>
+                    <Icon name={stat.icon as any} className={`text-${stat.color}-400`} size={32} />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
         
-        {/* Аналитика поведения в реальном времени */}
-        <div className="absolute top-32 right-8 animate-scale-in">
-          <Card className="w-64 bg-card/50 backdrop-blur-sm border-primary/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center">
-                <Icon name="Activity" className="mr-2 text-primary" size={16} />
-                Аналитика в реальном времени
+        {/* Панель аналитики */}
+        <div className="absolute top-32 right-8 hidden lg:block">
+          <Card className="w-72 bg-slate-900/70 backdrop-blur-sm border-blue-500/30 shadow-2xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center text-blue-400">
+                <Icon name="Activity" className="mr-2 animate-pulse" size={16} />
+                ИИ Аналитика в реальном времени
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span>Просмотры:</span>
-                <Badge variant="secondary">{userBehavior.pageViews}</Badge>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-300 text-sm">Активность:</span>
+                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                  {userBehavior.interactionScore} баллов
+                </Badge>
               </div>
-              <div className="space-y-1">
+              
+              <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Время на сайте:</span>
-                  <span>{userBehavior.timeOnPage}s</span>
+                  <span className="text-slate-300">Время на сайте:</span>
+                  <span className="text-blue-400">{userBehavior.timeOnPage}s</span>
                 </div>
-                <Progress value={(userBehavior.timeOnPage / 60) * 100} className="h-2" />
+                <Progress value={(userBehavior.timeOnPage / 60) * 100} className="h-2 bg-slate-800" />
               </div>
-              <div className="flex justify-between text-sm">
-                <span>Взаимодействия:</span>
-                <Badge className="bg-primary">{userBehavior.interactionScore}</Badge>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-300">Прогресс изучения:</span>
+                  <span className="text-purple-400">{Math.round(userBehavior.scrollProgress)}%</span>
+                </div>
+                <Progress value={userBehavior.scrollProgress} className="h-2 bg-slate-800" />
+              </div>
+              
+              <div className="pt-2 border-t border-slate-700">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-slate-400">ИИ анализирует ваше поведение</span>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </section>
 
-      {/* Технологии */}
-      <section id="tech" className="py-20 bg-muted/20">
+      {/* Секция технологий */}
+      <section className="py-20 relative">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16 animate-fade-in">
-            <h2 className="text-4xl font-bold mb-4">Передовые технологии</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Используем последние достижения в области искусственного интеллекта
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Передовые ИИ-технологии
+            </h2>
+            <p className="text-xl text-slate-300 max-w-3xl mx-auto">
+              Используем самые современные алгоритмы машинного обучения и нейронные сети
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: 'Brain', title: 'Машинное обучение', desc: 'Глубокие нейронные сети для анализа данных' },
-              { icon: 'Zap', title: 'Обработка в реальном времени', desc: 'Мгновенный анализ и принятие решений' },
-              { icon: 'Shield', title: 'Безопасность данных', desc: 'Криптографическая защита и приватность' }
+              { 
+                icon: 'Brain', 
+                title: 'Глубокое обучение', 
+                desc: 'Нейронные сети с 1000+ слоями для сложного анализа данных',
+                metrics: ['99.7% точность', '2.3ms обработка']
+              },
+              { 
+                icon: 'Zap', 
+                title: 'Real-time ИИ', 
+                desc: 'Мгновенная обработка и принятие решений в реальном времени',
+                metrics: ['<1ms задержка', '50K запросов/сек']
+              },
+              { 
+                icon: 'Shield', 
+                title: 'Безопасный ИИ', 
+                desc: 'Защищенные алгоритмы с шифрованием и приватностью данных',
+                metrics: ['256-bit шифрование', 'GDPR compliance']
+              }
             ].map((tech, i) => (
-              <Card key={i} className="hover:scale-105 transition-transform duration-300 animate-fade-in border-primary/20 bg-card/50 backdrop-blur-sm" style={{animationDelay: `${i * 0.2}s`}}>
-                <CardHeader className="text-center">
-                  <Icon name={tech.icon as any} className="mx-auto mb-4 text-primary animate-float" size={48} />
-                  <CardTitle>{tech.title}</CardTitle>
+              <Card key={i} className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:bg-slate-900/70 transform hover:scale-105 transition-all duration-500 group" style={{animationDelay: `${i * 0.2}s`}}>
+                <CardHeader className="text-center pb-4">
+                  <div className="relative mx-auto mb-4">
+                    <Icon name={tech.icon as any} className="text-blue-400 group-hover:text-purple-400 transition-colors duration-300" size={56} />
+                    <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  <CardTitle className="text-xl text-white group-hover:text-blue-400 transition-colors">
+                    {tech.title}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-muted-foreground">{tech.desc}</p>
+                <CardContent className="text-center space-y-4">
+                  <p className="text-slate-300">{tech.desc}</p>
+                  <div className="space-y-2">
+                    {tech.metrics?.map((metric, j) => (
+                      <Badge key={j} variant="outline" className="border-blue-500/30 text-blue-400 bg-blue-500/10">
+                        {metric}
+                      </Badge>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -364,54 +515,84 @@ export default function AICorpSite() {
       {/* ИИ-чатбот */}
       <div className="fixed bottom-6 right-6 z-50">
         {!chatOpen ? (
-          <Button
-            size="lg"
-            onClick={() => setChatOpen(true)}
-            className="rounded-full w-16 h-16 animate-pulse-glow hover:scale-110 transition-transform shadow-2xl"
-          >
-            <Icon name="MessageCircle" size={24} />
-          </Button>
+          <div className="relative">
+            <Button
+              size="lg"
+              onClick={() => setChatOpen(true)}
+              className="rounded-full w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-2xl transform hover:scale-110 transition-all duration-300"
+            >
+              <Icon name="MessageCircle" size={28} />
+            </Button>
+            {!aiWelcome && (
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center animate-bounce">
+                <span className="text-xs font-bold">!</span>
+              </div>
+            )}
+            <div className="absolute inset-0 bg-blue-400/30 rounded-full blur-xl animate-pulse"></div>
+          </div>
         ) : (
-          <Card className="w-80 h-96 flex flex-col animate-scale-in border-primary/20 bg-card/95 backdrop-blur-lg">
-            <CardHeader className="flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <Icon name="Bot" className="text-primary animate-pulse" size={20} />
-                <CardTitle className="text-sm">ИИ Ассистент</CardTitle>
+          <Card className="w-80 h-96 flex flex-col bg-slate-900/95 backdrop-blur-xl border-blue-500/30 shadow-2xl animate-slide-up">
+            <CardHeader className="flex-row items-center justify-between pb-3 border-b border-slate-700">
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <Icon name="Bot" className="text-blue-400 animate-pulse" size={24} />
+                  <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-sm"></div>
+                </div>
+                <div>
+                  <CardTitle className="text-sm text-blue-400">ARIA</CardTitle>
+                  <p className="text-xs text-slate-400">ИИ Ассистент</p>
+                </div>
               </div>
               <Button 
                 size="sm" 
                 variant="ghost"
                 onClick={() => setChatOpen(false)}
+                className="text-slate-400 hover:text-white hover:bg-slate-800"
               >
                 <Icon name="X" size={16} />
               </Button>
             </CardHeader>
             
-            <CardContent className="flex-1 overflow-y-auto space-y-3 text-sm">
+            <CardContent className="flex-1 overflow-y-auto space-y-3 text-sm p-4">
               {messages.map((msg, i) => (
-                <div key={i} className={`p-3 rounded-lg ${
+                <div key={i} className={`p-3 rounded-lg max-w-[90%] ${
                   msg.type === 'bot' 
-                    ? 'bg-primary/10 text-primary-foreground border-l-4 border-primary' 
-                    : 'bg-secondary text-secondary-foreground ml-4'
+                    ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-l-4 border-blue-400 text-slate-100 animate-slide-in-left' 
+                    : 'bg-slate-800 text-slate-200 ml-auto animate-slide-in-right'
                 }`}>
                   {msg.text}
+                  <div className="text-xs text-slate-500 mt-1">
+                    {new Date(msg.timestamp).toLocaleTimeString()}
+                  </div>
                 </div>
               ))}
             </CardContent>
             
-            <div className="p-4 border-t border-primary/20">
+            <div className="p-4 border-t border-slate-700">
               <div className="flex space-x-2">
                 <input
                   type="text"
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleChatSend()}
-                  placeholder="Задайте вопрос..."
-                  className="flex-1 px-3 py-2 bg-background border border-primary/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="Спросите что-нибудь об ИИ..."
+                  className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
                 />
-                <Button size="sm" onClick={handleChatSend} className="hover:scale-105 transition-transform">
+                <Button 
+                  size="sm" 
+                  onClick={handleChatSend}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-200"
+                >
                   <Icon name="Send" size={16} />
                 </Button>
+              </div>
+              <div className="flex items-center justify-center mt-2">
+                <div className="flex space-x-1">
+                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
+                  <div className="w-1 h-1 bg-purple-400 rounded-full animate-pulse delay-100"></div>
+                  <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse delay-200"></div>
+                </div>
+                <span className="text-xs text-slate-500 ml-2">ИИ готов к общению</span>
               </div>
             </div>
           </Card>
